@@ -46,6 +46,9 @@ func netmakerParse(c *caddy.Controller) (*Netmaker, error) {
 	}
 	nm.Entries = &entries
 
+	var APIKey string
+	var APIURL string
+
 	for c.Next() {
 		for c.NextBlock() {
 			switch c.Val() {
@@ -54,13 +57,13 @@ func netmakerParse(c *caddy.Controller) (*Netmaker, error) {
 				if len(args) != 1 {
 					return nil, c.ArgErr()
 				}
-				nm.APIURL = args[0]
+				APIURL = args[0]
 			case "api_key":
 				args := c.RemainingArgs()
 				if len(args) != 1 {
 					return nil, c.ArgErr()
 				}
-				nm.APIKey = args[0]
+				APIKey = args[0]
 			case "refresh_duration":
 				args := c.RemainingArgs()
 				if len(args) != 1 {
@@ -79,6 +82,9 @@ func netmakerParse(c *caddy.Controller) (*Netmaker, error) {
 			}
 		}
 	}
+
+	cl := NewClient(APIURL, APIKey)
+	nm.DNSClient = cl
 
 	return &nm, nil
 }

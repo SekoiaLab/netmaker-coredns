@@ -9,9 +9,14 @@ import (
 	"github.com/coredns/coredns/plugin"
 	"github.com/coredns/coredns/plugin/pkg/fall"
 	"github.com/coredns/coredns/request"
+	"github.com/gravitl/netmaker/models"
 	"github.com/miekg/dns"
 	"golang.org/x/net/context"
 )
+
+type DNSer interface {
+	DNS(context.Context) ([]models.Node, error)
+}
 
 // Netmaker is a plugin that talks to netmaker API to retrieve hosts
 type Netmaker struct {
@@ -24,10 +29,7 @@ type Netmaker struct {
 	Entries *DNSEntries
 	// RefreshDuration is the interval at which we will refresh informations from database
 	RefreshDuration time.Duration
-	// APIURL is the url of the api server of the netmaker instance
-	APIURL string
-	// APIKey is the key that allows us to talk to netmaker API
-	APIKey string
+	DNSClient       DNSer
 }
 
 // hostAddresses associate a network name and an IP address
@@ -132,10 +134,8 @@ func getMatchingAEntries(qn string, dataset *DNSEntries) ([]string, error) {
 
 // fetchEntries will retrieve the nodes from the Netmaker API.
 func (nm Netmaker) fetchEntries() (DNSEntries, error) {
-	c := NewClient(nm.APIURL, nm.APIKey)
-
 	ctx := context.Background()
-	nodes, err := c.Nodes(ctx)
+	nodes, err := nm.DNSClient.DNS(ctx)
 	if err != nil {
 		return nil, err
 	}
