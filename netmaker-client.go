@@ -23,8 +23,8 @@ func NewClient(APIURL string, APIToken string) *Client {
 	}
 }
 
-func (nm Client) Nodes(ctx context.Context) ([]models.Node, error) {
-	url := fmt.Sprintf("%v/api/nodes", nm.APIURL)
+func (nm Client) DNS(ctx context.Context) ([]models.Node, error) {
+	url := fmt.Sprintf("%v/api/dns", nm.APIURL)
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, err
